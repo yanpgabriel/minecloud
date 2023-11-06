@@ -1,23 +1,28 @@
 FROM openjdk:21-jdk
 
-RUN apt update -y && apt install -y curl jq
+# RUN apt update -y && apt install -y curl jq
 
 LABEL SrDregon https://github.com/yanpgabriel
 
 ENV VERSION=latest
 
-COPY ../getpaperserver.sh /usr/local/bin
+RUN useradd --create-home --shell /bin/bash minecraft
 
-RUN chmod +x /usr/local/bin/getpaperserver.sh
+WORKDIR /home/minecraft/data
 
-RUN useradd --create-home --shell /bin/bash minecraft \
- && mkdir -p /opt/papermc /var/opt/papermc \
- && chown -R minecraft /var/opt/papermc/
+RUN mkdir -p /home/minecraft/data
+
+COPY ../getpaperserver.sh .
+COPY ../start.sh .
+
+RUN chown -R minecraft .
+RUN chmod +x *.sh
 
 USER minecraft
 
-WORKDIR /var/opt/papermc
-VOLUME /var/opt/papermc
+VOLUME /home/minecraft/data
 
 EXPOSE 25565/TCP
 EXPOSE 25565/UDP
+
+CMD ./start.sh

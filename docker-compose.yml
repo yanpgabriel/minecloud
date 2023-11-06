@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  papermc: &server
+    image: yanpgabriel/minecloud
+    build:
+        context: ./
+        dockerfile: basic/Dockerfile
+    restart: no
+    tty: true
+    stdin_open: true
+    ports:
+      - "25565:25565"
+    environment:
+      EULA: "TRUE"
+    # volumes:
+      # - ./testedata:/home/minecraft/data

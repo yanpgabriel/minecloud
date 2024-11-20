@@ -1,6 +1,6 @@
 FROM amazoncorretto:21-alpine
 
-RUN apk add --no-cache curl jq micro
+RUN apk add --no-cache curl jq micro libstdc++
 
 LABEL nickname=SrDregon github=https://github.com/yanpgabriel
 

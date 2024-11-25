@@ -18,3 +18,5 @@ services:
       BUILD: latest
     volumes:
       - ./minecraft:/minecraft
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime:ro

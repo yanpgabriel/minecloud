@@ -1,6 +1,8 @@
 FROM amazoncorretto:21-alpine
 
-RUN apk add --no-cache curl jq micro lsof libpcap libwebp libcap libstdc++
+RUN apk add --no-cache tzdata curl jq micro lsof libpcap libwebp libcap libstdc++
+RUN ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+RUN apk del tzdata
 
 LABEL nickname=SrDregon github=https://github.com/yanpgabriel
 

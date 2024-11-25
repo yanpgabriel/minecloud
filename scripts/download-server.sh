@@ -42,6 +42,8 @@ else
   fi
 fi
 
+ls -lagh
+
 echo -------------------------
 echo Request version $VERSION build $BUILD
 echo Paper version $PAPERMC_VERSION build $PAPERMC_BUILD

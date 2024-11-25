@@ -4,14 +4,17 @@ RUN apk add --no-cache curl jq micro lsof libpcap libwebp libcap libstdc++
 
 LABEL nickname=SrDregon github=https://github.com/yanpgabriel
 
-RUN addgroup -g 1000 minecraft
-RUN adduser -Ss /bin/false -u 1000 -G minecraft -h /minecraft minecraft
+ARG UID=1000
+ARG GID=1000
+
+RUN addgroup -g ${GID} minecraft
+RUN adduser -Ss /bin/false -u ${UID} -G minecraft -h /minecraft minecraft
 
 RUN mkdir /scripts
 
 COPY ../scripts/*.sh /scripts
 
-RUN chmod 605 -R /scripts
+RUN chmod 777 -R /scripts
 
 USER minecraft
 

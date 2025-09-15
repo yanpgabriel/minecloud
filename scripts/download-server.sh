@@ -33,7 +33,7 @@ else
   if [[ $PAPERMC_BUILD == "latest" ]]; then
     LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r 'first(.[] | select(.channel == "STABLE") | .downloads."server:default".url) // "null"')
   else
-    LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r 'first(.[] | select(.id == $PAPERMC_BUILD) | select(.channel == "STABLE") | .downloads."server:default".url) // "null"')
+    LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r --argjson PAPERMC_BUILD "$PAPERMC_BUILD" 'first(.[] | select(.id == $PAPERMC_BUILD) | select(.channel == "STABLE") | .downloads."server:default".url) // "null"')
   fi
 
   PAPERMC_JAR_NAME=$LATEST_DOWNLOAD | jq -r  'split("/") | last'
@@ -42,7 +42,6 @@ else
       echo "[WARN] Versão já esta atualizada!"
   else
       echo "[INFO] Baixando nova versão..."
-      #PAPERMC_DOWNLOAD_URL="https://api.papermc.io/v2/projects/paper/versions/${PAPERMC_VERSION}/builds/${PAPERMC_BUILD}/downloads/${LATEST_DOWNLOAD}"
       curl -s -o ${PAPERMC_JAR_NAME} ${LATEST_DOWNLOAD}
       echo "[OK] Nova versão pronta para uso."
   fi

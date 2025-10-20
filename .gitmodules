@@ -1,0 +1,3 @@
+[submodule "server_downloader"]
+	path = server_downloader
+	url = https://gitea.oyan.dev/yan/server_downloader.git

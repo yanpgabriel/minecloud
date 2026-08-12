@@ -41,8 +41,21 @@ make staging-down    # ou: just staging-down    — para o staging
 
 ### Publicar a imagem no Gitea
 
+**Login no registry (uma vez só, antes do primeiro `publish`):**
+
+1. No Gitea (`gitea.oyan.dev`), vá em **Configurações do usuário → Aplicações** (`/user/settings/applications`).
+2. Em "Gerar novo token", dê um nome (ex: `minecloud-registry`) e marque pelo menos o escopo `write:package` (inclua `read:package` também se for puxar a imagem depois, ex: num deploy pull-based). Gere e **copie o token na hora** — ele não é mostrado de novo.
+3. Faça login no registry usando o token como senha:
+   ```sh
+   docker login gitea.oyan.dev
+   # Username: <seu usuário do Gitea>
+   # Password: <cole o token gerado, não a senha da conta>
+   ```
+4. Pronto — o Docker guarda a credencial, então `make publish` / `just publish` funcionam direto daqui em diante sem pedir login de novo.
+
+> Se o `docker push` falhar com `denied` / `packages are disabled` / 403: confirme que o registry de pacotes está habilitado na instância (`[packages]` `ENABLED = true` no `app.ini` do Gitea) e que o token tem o escopo `write:package`.
+
 ```sh
-docker login gitea.oyan.dev   # uma vez, antes do primeiro publish
 make publish                  # ou: just publish            — builda e publica :latest
 make publish TAG=v1.2.3       # ou: just publish v1.2.3     — com uma tag específica
 ```

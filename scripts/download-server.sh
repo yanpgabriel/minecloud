@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 SEMPRE_BAIXAR=FALSE
 
@@ -9,7 +10,11 @@ USER_AGENT="minecloud/1.0.0 (oyan.dev)"
 if [[ $PAPERMC_VERSION == "" || $PAPERMC_VERSION == "latest" ]]; then
   SEMPRE_BAIXAR=TRUE
   echo "[INFO] Buscando ultima versão do papermc"
-  PAPERMC_VERSION=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper | jq -r '.versions | to_entries[0] | .value[0]')
+  PAPERMC_VERSION=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper | jq -r '.versions | to_entries[0] | .value[0]') || true
+  if [[ -z "$PAPERMC_VERSION" || "$PAPERMC_VERSION" == "null" ]]; then
+    echo "[ERRO] Nao foi possivel obter a ultima versao do papermc (API fill.papermc.io fora do ar?)"
+    exit 1
+  fi
   echo "[OK] Versão do papermc mais atualizada: ${PAPERMC_VERSION}"
 else
   echo "[WARN] Parece que uma versão especifica do papermc foi informada, tentando baixar a build mais recente dela..."
@@ -18,7 +23,11 @@ fi
 if [[ $PAPERMC_BUILD == "" || $PAPERMC_BUILD == "latest" ]]; then
   SEMPRE_BAIXAR=TRUE
   echo "[INFO] Buscando ultima build para a versão: ${PAPERMC_VERSION}"
-  PAPERMC_BUILD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r 'map(select(.channel == "STABLE")) | .[0] | .id')
+  PAPERMC_BUILD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r 'map(select(.channel == "STABLE")) | .[0] | .id') || true
+  if [[ -z "$PAPERMC_BUILD" || "$PAPERMC_BUILD" == "null" ]]; then
+    echo "[ERRO] Nao foi possivel obter a ultima build estavel para a versao ${PAPERMC_VERSION}"
+    exit 1
+  fi
   echo "[OK] Última build encontrada: ${PAPERMC_BUILD}"
 else
   echo "[WARN] Parece que uma versão especifica da build do papermc foi informada, tentando baixar..."
@@ -31,18 +40,26 @@ if [[ -f ~/${PAPERMC_JAR_NAME} && ${SEMPRE_BAIXAR} == FALSE ]]; then
 else
   echo "[INFO] Verificando se a versão ${PAPERMC_VERSION}-${PAPERMC_BUILD} ja esta em uso..."
   if [[ $PAPERMC_BUILD == "latest" ]]; then
-    LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r 'first(.[] | select(.channel == "STABLE") | .downloads."server:default".url) // "null"')
+    LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r 'first(.[] | select(.channel == "STABLE") | .downloads."server:default".url) // "null"') || true
   else
-    LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r --argjson PAPERMC_BUILD "$PAPERMC_BUILD" 'first(.[] | select(.id == $PAPERMC_BUILD) | select(.channel == "STABLE") | .downloads."server:default".url) // "null"')
+    LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r --argjson PAPERMC_BUILD "$PAPERMC_BUILD" 'first(.[] | select(.id == $PAPERMC_BUILD) | select(.channel == "STABLE") | .downloads."server:default".url) // "null"') || true
   fi
 
-  PAPERMC_JAR_NAME=$LATEST_DOWNLOAD | jq -r  'split("/") | last'
+  if [[ -z "$LATEST_DOWNLOAD" || "$LATEST_DOWNLOAD" == "null" ]]; then
+    echo "[ERRO] Nao foi possivel encontrar o link de download para ${PAPERMC_VERSION}-${PAPERMC_BUILD}"
+    exit 1
+  fi
+
+  PAPERMC_JAR_NAME=$(basename "$LATEST_DOWNLOAD")
 
   if [[ -f ./${PAPERMC_JAR_NAME} ]]; then
       echo "[WARN] Versão já esta atualizada!"
   else
       echo "[INFO] Baixando nova versão..."
-      curl -s -o ${PAPERMC_JAR_NAME} ${LATEST_DOWNLOAD}
+      if ! curl -s -o "${PAPERMC_JAR_NAME}" "${LATEST_DOWNLOAD}"; then
+        echo "[ERRO] Falha ao baixar ${LATEST_DOWNLOAD}"
+        exit 1
+      fi
       echo "[OK] Nova versão pronta para uso."
   fi
 fi

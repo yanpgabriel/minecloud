@@ -20,7 +20,7 @@ services:
       - "25565:25565"
     environment:
       EULA: "TRUE"
-      VERSION: latest
+      VERSION: "26.2"
       BUILD: latest
       PAPERMC_START_MEMORY: 1G
       PAPERMC_MAX_MEMORY: 4G

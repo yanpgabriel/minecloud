@@ -12,10 +12,7 @@ Checklist de ações levantadas na análise do projeto (2026-08-11). Conforme um
 
 ## 🟠 Importante
 
-✅ Já resolvido: bug de atribuição do `PAPERMC_JAR_NAME` em `download-server.sh` (trocado por `basename`), `set -e` + validação de `null`/vazio nas respostas de `curl`/`jq` (com mensagem clara e `exit 1` em vez de seguir com estado quebrado), e checagem de permissão de escrita em `/minecraft` no `entrypoint.sh`. Validado com build real: fluxo feliz (`latest`/`latest`, jar nomeado corretamente) e fluxo de erro (build inexistente aborta com mensagem clara, exit code 1).
-
-- [ ] **Pinar versão do Paper depois de estabilizar com o yCore**
-  `VERSION=latest`/`BUILD=latest` atualiza o Paper a cada boot, o que pode quebrar compatibilidade de plugin sem aviso. Deixar `latest` só pra ambiente de teste; em produção fixar `VERSION`/`BUILD` explícitos no `docker-compose.yml`. (Ainda pendente — só faz sentido depois que o yCore estiver rodando de forma estável nessa stack.)
+✅ Já resolvido: bug de atribuição do `PAPERMC_JAR_NAME` em `download-server.sh` (trocado por `basename`), `set -e` + validação de `null`/vazio nas respostas de `curl`/`jq` (com mensagem clara e `exit 1` em vez de seguir com estado quebrado), checagem de permissão de escrita em `/minecraft` no `entrypoint.sh`, e versão do Paper pinada em `VERSION: "26.2"` (com `BUILD: latest`, que hoje resolve pra `112` — a build validada). Isso trava o servidor na versão de Minecraft estável em uso, mas ainda pega builds de correção novas automaticamente dentro do 26.2. Validado com build real em todos os casos.
 
 ## 🟡 Melhorias menores
 

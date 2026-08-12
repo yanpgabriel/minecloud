@@ -4,6 +4,14 @@ Checklist de ações levantadas na análise do projeto (2026-08-11). Conforme um
 
 ✅ Já resolvido (bloco 🔴 Crítico inteiro): Java rodando como PID 1 (`exec` em `start-server.sh`), `stop_grace_period: 60s`, heap da JVM configurado via env vars, e a imagem base trocada pra `amazoncorretto:25-alpine` (o `latest` do Paper exige Java 25+, o Java 21 antigo nem subia).
 
+## 🔴 Produção (achados na avaliação de prontidão, 2026-08-11)
+
+✅ Já resolvido: rotação de log configurada no `docker-compose.yml` (`logging.driver: json-file`, `max-size: 10m`, `max-file: 5` — ~50MB no total por container), evitando que o disco do host encha silenciosamente com o tempo. Validado via `docker inspect` (`LogConfig` aplicado corretamente).
+
+- Backup do mundo/plugins: **não é responsabilidade do minecloud** — o próprio yCore já faz backup de mundos e plugins na camada de plugin.
+- [ ] **Healthcheck**: hoje o Docker só sabe se o container está rodando, não se o servidor travou. Um `HEALTHCHECK` (via RCON ping ou checagem de porta) daria visibilidade real de "travado" em vez de só "container up".
+- [ ] **Jars antigos nunca são limpos**: cada troca de versão/build do Paper deixa o `.jar` anterior no volume `/minecraft`. Disco cresce aos poucos ao longo do tempo. Vale um cleanup no `download-server.sh` depois de confirmar que o novo jar baixou/rodou com sucesso.
+
 ## 🟠 Importante
 
 ✅ Já resolvido: bug de atribuição do `PAPERMC_JAR_NAME` em `download-server.sh` (trocado por `basename`), `set -e` + validação de `null`/vazio nas respostas de `curl`/`jq` (com mensagem clara e `exit 1` em vez de seguir com estado quebrado), e checagem de permissão de escrita em `/minecraft` no `entrypoint.sh`. Validado com build real: fluxo feliz (`latest`/`latest`, jar nomeado corretamente) e fluxo de erro (build inexistente aborta com mensagem clara, exit code 1).

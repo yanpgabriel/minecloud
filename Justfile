@@ -1,3 +1,9 @@
+set dotenv-load := true
+set dotenv-filename := ".env"
+
+registry_image := env_var_or_default("REGISTRY_IMAGE", "gitea.oyan.dev/yan/minecloud")
+platforms := env_var_or_default("PLATFORMS", "linux/amd64,linux/arm64/v8")
+
 default:
     @just --list
 
@@ -21,8 +27,7 @@ restart:
     docker compose restart
 
 publish tag="latest":
-    docker build -t gitea.oyan.dev/yan/minecloud:{{ tag }} .
-    docker push gitea.oyan.dev/yan/minecloud:{{ tag }}
+    docker buildx build --platform {{ platforms }} -t {{ registry_image }}:{{ tag }} --push .
 
 staging-up:
     docker compose --profile staging up -d papermc-staging

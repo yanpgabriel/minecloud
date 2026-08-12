@@ -1,3 +1,5 @@
 .DS_Store
 /minecraft
+/minecraft-staging
 .idea/
+.env

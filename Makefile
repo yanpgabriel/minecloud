@@ -1,5 +1,9 @@
-REGISTRY_IMAGE := gitea.oyan.dev/yan/minecloud
+-include .env
+export
+
+REGISTRY_IMAGE ?= gitea.oyan.dev/yan/minecloud
 TAG ?= latest
+PLATFORMS ?= linux/amd64,linux/arm64/v8
 
 .PHONY: down up deploy logs shell restart publish staging-up staging-down staging-logs staging-shell
 
@@ -18,8 +22,7 @@ restart:
 	docker compose restart
 
 publish:
-	docker build -t $(REGISTRY_IMAGE):$(TAG) .
-	docker push $(REGISTRY_IMAGE):$(TAG)
+	docker buildx build --platform $(PLATFORMS) -t $(REGISTRY_IMAGE):$(TAG) --push .
 
 staging-up:
 	docker compose --profile staging up -d papermc-staging

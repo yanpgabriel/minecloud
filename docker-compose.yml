@@ -18,7 +18,7 @@ x-papermc-base: &papermc-base
 services:
   papermc:
     <<: *papermc-base
-    image: gitea.oyan.dev/yan/minecloud:latest
+    image: ${REGISTRY_IMAGE:-gitea.oyan.dev/yan/minecloud}:latest
     mem_limit: 5g
     ports:
       - "25565:25565"
@@ -33,7 +33,7 @@ services:
 
   papermc-staging:
     <<: *papermc-base
-    image: gitea.oyan.dev/yan/minecloud:staging
+    image: ${REGISTRY_IMAGE:-gitea.oyan.dev/yan/minecloud}:staging
     profiles: ["staging"]
     mem_limit: 3g
     ports:

@@ -55,10 +55,22 @@ make staging-down    # ou: just staging-down    — para o staging
 
 > Se o `docker push` falhar com `denied` / `packages are disabled` / 403: confirme que o registry de pacotes está habilitado na instância (`[packages]` `ENABLED = true` no `app.ini` do Gitea) e que o token tem o escopo `write:package`.
 
+> ⚠️ Se o Gitea estiver atrás de Cloudflare (proxy ou Tunnel/Zero Trust), o push provavelmente vai falhar com `413 Payload Too Large` ou `unexpected EOF` — a camada do JDK sozinha tem mais de 300MB, acima do limite de upload de 100MB da Cloudflare (Free/Pro/Business, sem opção de aumentar pelo painel). Solução: publique de uma máquina que alcance o Gitea **sem passar pela Cloudflare** (rede local, VPN) — configure isso no `.env` (veja abaixo).
+
+**Endereço do registry (`.env`):**
+
 ```sh
-make publish                  # ou: just publish            — builda e publica :latest
+cp .env.example .env
+```
+
+Edite `REGISTRY_IMAGE` no `.env` — por padrão é o DNS público (`gitea.oyan.dev/yan/minecloud`), mas pode ser um IP/porta local (ex: `X.X.X.X:3000/yan/minecloud`) pra contornar o limite da Cloudflare. `.env` não é commitado; `make`/`just` e o `docker-compose.yml` leem ele automaticamente. Sem `.env`, cai no padrão do DNS público.
+
+```sh
+make publish                  # ou: just publish            — builda multi-arch (amd64+arm64/v8) e publica :latest
 make publish TAG=v1.2.3       # ou: just publish v1.2.3     — com uma tag específica
 ```
+
+A imagem é publicada pra `linux/amd64` e `linux/arm64/v8` (via `docker buildx`, usando emulação QEMU do Docker Desktop pra cross-compilar) — funciona tanto num host x86 quanto ARM. Isso deixa o build mais lento que um build single-arch normal.
 
 ## Variáveis de ambiente
 

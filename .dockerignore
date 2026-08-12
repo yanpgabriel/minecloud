@@ -1,0 +1,6 @@
+.git
+.idea
+.github
+minecraft/
+minecraft-staging/
+server_downloader/

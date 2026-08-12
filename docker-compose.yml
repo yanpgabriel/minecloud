@@ -1,21 +1,25 @@
+x-papermc-base: &papermc-base
+  build:
+    context: ./
+    dockerfile: Dockerfile
+    args:
+      UID: 1000
+      GID: 1000
+  restart: unless-stopped
+  tty: true
+  stdin_open: true
+  stop_grace_period: 60s
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
 services:
   papermc:
-    image: yanpgabriel/minecloud
-    build:
-        context: ./
-        dockerfile: Dockerfile
-        args:
-            UID: 1000
-            GID: 1000
-    restart: unless-stopped
-    tty: true
-    stdin_open: true
-    stop_grace_period: 60s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "5"
+    <<: *papermc-base
+    image: gitea.oyan.dev/yan/minecloud:latest
+    mem_limit: 5g
     ports:
       - "25565:25565"
     environment:
@@ -26,3 +30,19 @@ services:
       PAPERMC_MAX_MEMORY: 4G
     volumes:
       - ./minecraft:/minecraft
+
+  papermc-staging:
+    <<: *papermc-base
+    image: gitea.oyan.dev/yan/minecloud:staging
+    profiles: ["staging"]
+    mem_limit: 3g
+    ports:
+      - "25566:25565"
+    environment:
+      EULA: "TRUE"
+      VERSION: "26.2"
+      BUILD: latest
+      PAPERMC_START_MEMORY: 1G
+      PAPERMC_MAX_MEMORY: 2G
+    volumes:
+      - ./minecraft-staging:/minecraft

@@ -10,6 +10,14 @@ Checklist de ações levantadas na análise do projeto (2026-08-11). Conforme um
 
 - Backup do mundo/plugins: **não é responsabilidade do minecloud** — o próprio yCore já faz backup de mundos e plugins na camada de plugin.
 
+## ✅ Reanálise de funcionalidades (2026-08-11)
+
+✅ Já resolvido: `EULA` agora é checada de verdade em `start-server.sh` (abortava antes disso ser cosmético — hoje `EULA != TRUE` aborta com mensagem clara); ambiente de staging isolado (`papermc-staging`, profile do compose, porta `25566`, volume e memória próprios — `make staging-up/down/logs/shell`); `mem_limit` no compose (`5g` produção / `3g` staging, com folga sobre o heap da JVM); `.dockerignore` criado; imagem publicável no registry do Gitea (`gitea.oyan.dev/yan/minecloud`) via `make publish` (manual, pronta pra plugar um workflow de CI depois — mesmo nome de imagem usado em `image:` do compose). Validado com build + boot real, incluindo os dois serviços (produção + staging) rodando em paralelo e a rejeição de `EULA=FALSE`.
+
+- [ ] **CI automático no Gitea Actions**: pendente até você configurar Actions + runner no `gitea.oyan.dev`. Quando tiver, dá pra criar um `.gitea/workflows/publish.yml` reaproveitando o mesmo `docker build`/`push` do `make publish`.
+- [ ] **Env vars pra configs comuns do `server.properties`** (MOTD, max-players, view-distance, dificuldade) — hoje só editando o arquivo manualmente depois do primeiro boot.
+- [ ] **Atalho de deploy de plugin** (`make update-plugin JAR=...`) — só compensa se você quiser automatizar a cópia de builds novas do yCore pelo minecloud em vez de copiar manualmente.
+
 ## 🟠 Importante
 
 ✅ Já resolvido: bug de atribuição do `PAPERMC_JAR_NAME` em `download-server.sh` (trocado por `basename`), `set -e` + validação de `null`/vazio nas respostas de `curl`/`jq` (com mensagem clara e `exit 1` em vez de seguir com estado quebrado), checagem de permissão de escrita em `/minecraft` no `entrypoint.sh`, e versão do Paper pinada em `VERSION: "26.2"` (com `BUILD: latest`, que hoje resolve pra `112` — a build validada). Isso trava o servidor na versão de Minecraft estável em uso, mas ainda pega builds de correção novas automaticamente dentro do 26.2. Validado com build real em todos os casos.
@@ -20,5 +28,6 @@ Checklist de ações levantadas na análise do projeto (2026-08-11). Conforme um
 
 ## Ideias de conveniência (opcional)
 
-- [ ] Adicionar targets no `Makefile`: `logs`, `shell` (attach no console do server), `restart`.
-- [ ] Configurar RCON (env vars + porta) pra administração remota sem precisar de `docker attach`.
+✅ Já resolvido: targets `logs`, `shell` (attach no console) e `restart` adicionados ao `Makefile`. Validado rodando de verdade (`make restart` reiniciou o container, `docker compose logs` confirmou a saída do `logs`).
+
+- [ ] **RCON**: ignorado por enquanto — só faz sentido se surgir uma automação/bot/painel externo que precise mandar comando pro servidor sem passar pelo Docker. Ver conversa de 2026-08-11 pra detalhes de trade-off (expõe porta extra, precisa gerenciar senha).

@@ -6,6 +6,11 @@ cd /minecraft
 # shellcheck disable=SC1091
 source variaveis.env
 
+if [[ "${EULA^^}" != "TRUE" ]]; then
+  echo "[ERRO] EULA nao aceita. Defina EULA=TRUE no docker-compose.yml pra concordar com https://aka.ms/MinecraftEULA e subir o servidor."
+  exit 1
+fi
+
 echo "eula=true" > eula.txt
 
 PAPERMC_START_MEMORY=${PAPERMC_START_MEMORY:-1G}

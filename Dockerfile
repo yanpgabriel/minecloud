@@ -30,4 +30,7 @@ EXPOSE 25565/UDP
 ENV VERSION=latest
 ENV BUILD=latest
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
+  CMD bash -c 'exec 3<>/dev/tcp/127.0.0.1/25565' || exit 1
+
 ENTRYPOINT /scripts/entrypoint.sh

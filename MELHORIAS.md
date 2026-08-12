@@ -6,11 +6,9 @@ Checklist de ações levantadas na análise do projeto (2026-08-11). Conforme um
 
 ## 🔴 Produção (achados na avaliação de prontidão, 2026-08-11)
 
-✅ Já resolvido: rotação de log configurada no `docker-compose.yml` (`logging.driver: json-file`, `max-size: 10m`, `max-file: 5` — ~50MB no total por container), evitando que o disco do host encha silenciosamente com o tempo. Validado via `docker inspect` (`LogConfig` aplicado corretamente).
+✅ Já resolvido: rotação de log configurada no `docker-compose.yml` (`logging.driver: json-file`, `max-size: 10m`, `max-file: 5` — ~50MB no total por container); `HEALTHCHECK` no `Dockerfile` (checa se a porta 25565 aceita conexão TCP, `start-period` de 120s pra dar tempo do boot); e limpeza automática de jars antigos do Paper em `download-server.sh` a cada boot (mantém só o jar em uso). Validado com build real: `docker inspect` mostra `LogConfig` correto e `Health.Status: healthy` após o boot; jar antigo de teste foi removido, só o atual ficou no volume.
 
 - Backup do mundo/plugins: **não é responsabilidade do minecloud** — o próprio yCore já faz backup de mundos e plugins na camada de plugin.
-- [ ] **Healthcheck**: hoje o Docker só sabe se o container está rodando, não se o servidor travou. Um `HEALTHCHECK` (via RCON ping ou checagem de porta) daria visibilidade real de "travado" em vez de só "container up".
-- [ ] **Jars antigos nunca são limpos**: cada troca de versão/build do Paper deixa o `.jar` anterior no volume `/minecraft`. Disco cresce aos poucos ao longo do tempo. Vale um cleanup no `download-server.sh` depois de confirmar que o novo jar baixou/rodou com sucesso.
 
 ## 🟠 Importante
 

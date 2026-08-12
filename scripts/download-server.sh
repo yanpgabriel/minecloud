@@ -80,6 +80,13 @@ else
   fi
 fi
 
+OLD_JARS=$(find . -maxdepth 1 -name 'paper-*.jar' ! -name "${PAPERMC_JAR_NAME}" -type f)
+if [[ -n "$OLD_JARS" ]]; then
+  echo "[INFO] Removendo jars antigos do papermc:"
+  echo "$OLD_JARS"
+  find . -maxdepth 1 -name 'paper-*.jar' ! -name "${PAPERMC_JAR_NAME}" -type f -delete
+fi
+
 ls -lagh
 
 echo -------------------------

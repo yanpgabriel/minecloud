@@ -1,6 +1,6 @@
 FROM amazoncorretto:25-alpine
 
-RUN apk add --no-cache tzdata curl jq micro lsof libpcap libwebp libcap libstdc++
+RUN apk add --no-cache tzdata curl jq micro lsof libpcap libwebp libcap libstdc++ bash
 RUN ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 RUN apk del tzdata
 
@@ -16,7 +16,7 @@ RUN mkdir /scripts
 
 COPY ../scripts/*.sh /scripts
 
-RUN chmod 777 -R /scripts
+RUN chmod 755 -R /scripts
 
 USER minecraft
 

@@ -58,9 +58,10 @@ scripts/
   entrypoint.sh           # ponto de entrada do container
   download-server.sh      # resolve versão/build e baixa o jar do Paper (fill.papermc.io)
   start-server.sh          # sobe o servidor (java como PID 1, heap configurável)
-server_downloader/       # submódulo em TypeScript/Bun — reescrita do download-server.sh
-                          # em andamento, ainda não integrado à imagem
+server_downloader/       # submódulo em TypeScript/Bun — experimento/ferramenta de dev
 ```
+
+> `server_downloader` é uma reescrita experimental do `download-server.sh` em TypeScript/Bun. Não está integrada ao Dockerfile/entrypoint e **não é usada em produção** — é só uma ferramenta local, rodada manualmente (`bun run dev`) se quiser testar.
 
 ### Paths dentro do container
 

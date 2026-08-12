@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 SEMPRE_BAIXAR=FALSE
@@ -23,7 +23,7 @@ fi
 if [[ $PAPERMC_BUILD == "" || $PAPERMC_BUILD == "latest" ]]; then
   SEMPRE_BAIXAR=TRUE
   echo "[INFO] Buscando ultima build para a versão: ${PAPERMC_VERSION}"
-  PAPERMC_BUILD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r 'map(select(.channel == "STABLE")) | .[0] | .id') || true
+  PAPERMC_BUILD=$(curl -s -H "User-Agent: $USER_AGENT" "https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds" | jq -r 'map(select(.channel == "STABLE")) | .[0] | .id') || true
   if [[ -z "$PAPERMC_BUILD" || "$PAPERMC_BUILD" == "null" ]]; then
     echo "[ERRO] Nao foi possivel obter a ultima build estavel para a versao ${PAPERMC_VERSION}"
     exit 1
@@ -39,11 +39,16 @@ if [[ -f ~/${PAPERMC_JAR_NAME} && ${SEMPRE_BAIXAR} == FALSE ]]; then
   echo "[OK] Parece que o arquivo já foi baixado. Pulando download"
 else
   echo "[INFO] Verificando se a versão ${PAPERMC_VERSION}-${PAPERMC_BUILD} ja esta em uso..."
+  BUILD_JSON=$(curl -s -H "User-Agent: $USER_AGENT" "https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds") || true
+
   if [[ $PAPERMC_BUILD == "latest" ]]; then
-    LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r 'first(.[] | select(.channel == "STABLE") | .downloads."server:default".url) // "null"') || true
+    DOWNLOAD_INFO=$(echo "$BUILD_JSON" | jq -r 'first(.[] | select(.channel == "STABLE")) | .downloads."server:default" | [.url, .checksums.sha256] | @tsv') || true
   else
-    LATEST_DOWNLOAD=$(curl -s -H "User-Agent: $USER_AGENT" https://fill.papermc.io/v3/projects/paper/versions/${PAPERMC_VERSION}/builds | jq -r --argjson PAPERMC_BUILD "$PAPERMC_BUILD" 'first(.[] | select(.id == $PAPERMC_BUILD) | select(.channel == "STABLE") | .downloads."server:default".url) // "null"') || true
+    DOWNLOAD_INFO=$(echo "$BUILD_JSON" | jq -r --argjson PAPERMC_BUILD "$PAPERMC_BUILD" 'first(.[] | select(.id == $PAPERMC_BUILD) | select(.channel == "STABLE")) | .downloads."server:default" | [.url, .checksums.sha256] | @tsv') || true
   fi
+
+  LATEST_DOWNLOAD=$(echo "$DOWNLOAD_INFO" | cut -f1)
+  LATEST_SHA256=$(echo "$DOWNLOAD_INFO" | cut -f2)
 
   if [[ -z "$LATEST_DOWNLOAD" || "$LATEST_DOWNLOAD" == "null" ]]; then
     echo "[ERRO] Nao foi possivel encontrar o link de download para ${PAPERMC_VERSION}-${PAPERMC_BUILD}"
@@ -60,6 +65,17 @@ else
         echo "[ERRO] Falha ao baixar ${LATEST_DOWNLOAD}"
         exit 1
       fi
+
+      if [[ -n "$LATEST_SHA256" && "$LATEST_SHA256" != "null" ]]; then
+        ACTUAL_SHA256=$(sha256sum "${PAPERMC_JAR_NAME}" | cut -d' ' -f1)
+        if [[ "$ACTUAL_SHA256" != "$LATEST_SHA256" ]]; then
+          echo "[ERRO] Checksum sha256 nao confere para ${PAPERMC_JAR_NAME} (esperado ${LATEST_SHA256}, obtido ${ACTUAL_SHA256})"
+          rm -f "${PAPERMC_JAR_NAME}"
+          exit 1
+        fi
+        echo "[OK] Checksum sha256 conferido."
+      fi
+
       echo "[OK] Nova versão pronta para uso."
   fi
 fi
@@ -67,8 +83,8 @@ fi
 ls -lagh
 
 echo -------------------------
-echo Request version $VERSION build $BUILD
-echo Paper version $PAPERMC_VERSION build $PAPERMC_BUILD
+echo Request version "$VERSION" build "$BUILD"
+echo Paper version "$PAPERMC_VERSION" build "$PAPERMC_BUILD"
 echo -------------------------
 
-echo "PAPERMC_JAR_NAME=${PAPERMC_JAR_NAME}" >> /minecraft/variaveis.env
+echo "PAPERMC_JAR_NAME=${PAPERMC_JAR_NAME}" > /minecraft/variaveis.env

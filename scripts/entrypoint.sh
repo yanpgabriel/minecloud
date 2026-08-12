@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 if [ ! -w /minecraft ]; then
@@ -8,8 +8,10 @@ fi
 
 echo "Versão selecionada ${VERSION}-${BUILD}"
 
+# shellcheck disable=SC1091
 source /scripts/download-server.sh
 
 echo 'Iniciando...'
 
+# shellcheck disable=SC1091
 source /scripts/start-server.sh

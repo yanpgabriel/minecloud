@@ -13,20 +13,7 @@ Checklist de ações levantadas na análise do projeto (2026-08-11). Conforme um
 
 ## 🟡 Melhorias menores
 
-- [ ] **`restart: no` → `restart: unless-stopped`** no `docker-compose.yml`, pra sobreviver a reboot do host/crash.
-- [ ] **Remover bind mount de `/etc/timezone` e `/etc/localtime`**
-  Só funciona em host Linux (quebra no Windows, onde você desenvolve). O Dockerfile já fixa `America/Sao_Paulo` na imagem — os volumes são redundantes.
-- [ ] **Parar de acumular linhas em `variaveis.env`**
-  Cada boot faz `>>` (append) de `PAPERMC_JAR_NAME=...`. Funciona (última linha vence), mas o arquivo cresce pra sempre. Sobrescrever em vez de anexar, ou limpar antes.
-- [ ] **Padronizar shell**: hoje mistura bash-isms (`[[ ]]`, `source`) com `#!/bin/sh`. Funciona por causa do compat mode do BusyBox ash do Alpine, mas é frágil. Trocar pra `#!/bin/bash` (instalar `bash` no Dockerfile) ou reescrever em POSIX puro (`[ ]`, `.`).
-- [ ] **Reduzir permissão de `/scripts`**: `chmod 777 -R` → `755` já basta (não precisa ser world-writable).
-- [ ] **Adicionar `.idea/` ao `.gitignore`** (hoje aparece como untracked no `git status`).
-- [ ] **Decidir o destino do submódulo `server_downloader`**
-  Parece ser a reescrita em TS/Bun do `download-server.sh`, mas não está integrada ao Dockerfile/entrypoint e por padrão assume `vanilla` em vez de `paper`.
-  - Opção A: terminar a migração — compilar binário (`bun build --compile`), copiar pra imagem, chamar do entrypoint, aposentar o script shell.
-  - Opção B: manter só como ferramenta local/dev e deixar claro no README que não é usado em produção ainda.
-- [ ] **Checksum do `.jar` baixado**: validar contra o hash exposto pela API do PaperMC antes de usar o arquivo.
-- [ ] **Adicionar `shellcheck` (CI ou pre-commit)**: teria pego o bug do item de `download-server.sh` na hora.
+✅ Já resolvido: `restart: unless-stopped`, removidos os bind mounts de `/etc/timezone`/`/etc/localtime` (só funcionavam em host Linux), `variaveis.env` agora é sobrescrito em vez de acumular linhas, scripts migrados pra `#!/bin/bash` (com `bash` instalado na imagem — sem mais depender do compat mode do BusyBox ash), permissão de `/scripts` reduzida pra `755`, `.idea/` no `.gitignore`, checksum sha256 do `.jar` validado contra a API do PaperMC antes de usar o arquivo, CI com `shellcheck` (`.github/workflows/shellcheck.yml`) — scripts já passam limpos —, e destino do `server_downloader` decidido (fica como ferramenta local/dev, documentado no README; não integrado ao Dockerfile). Tudo validado com build + boot real.
 
 ## Ideias de conveniência (opcional)
 

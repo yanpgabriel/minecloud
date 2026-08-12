@@ -7,15 +7,11 @@ source variaveis.env
 
 echo "eula=true" > eula.txt
 
-#echo "> java -Xms${PAPERMC_START_MEMORY} \
-#            -Xmx${PAPERMC_MAX_MEMORY} ${PAPERMC_JAVA_ARGS}
-#            -Dcom.mojang.eula.agree=true
-#            -jar ${PAPERMC_JAR_NAME}
-#            -p ${PAPERMC_PORT}
-#            -h ${PAPERMC_HOST}
-#            -s ${PAPERMC_MAX_PLAYERS}
-#            -P ${PAPERMC_PLUGIN_DIR}
-#            -W ${PAPERMC_WORLD_DIR} ${PAPERMC_ARGS} ${PARAMS}"
-#java -Xms${PAPERMC_START_MEMORY} -Xmx${PAPERMC_MAX_MEMORY} ${PAPERMC_JAVA_ARGS} -Dcom.mojang.eula.agree=true -jar ${PAPERMC_JAR_NAME} -p ${PAPERMC_PORT} -h ${PAPERMC_HOST} -s ${PAPERMC_MAX_PLAYERS} -P ${PAPERMC_PLUGIN_DIR} -W ${PAPERMC_WORLD_DIR} ${PAPERMC_ARGS} ${PARAMS}
+PAPERMC_START_MEMORY=${PAPERMC_START_MEMORY:-1G}
+PAPERMC_MAX_MEMORY=${PAPERMC_MAX_MEMORY:-2G}
 
-java -jar ${PAPERMC_JAR_NAME}
+echo "[INFO] Heap: -Xms${PAPERMC_START_MEMORY} -Xmx${PAPERMC_MAX_MEMORY}"
+
+# exec substitui o processo do shell pelo java, para que ele vire PID 1
+# e receba o SIGTERM do "docker stop" diretamente (permite salvar o mundo antes de encerrar)
+exec java -Xms${PAPERMC_START_MEMORY} -Xmx${PAPERMC_MAX_MEMORY} ${PAPERMC_JAVA_ARGS} -jar ${PAPERMC_JAR_NAME} --nogui

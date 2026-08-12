@@ -10,12 +10,15 @@ services:
     restart: no
     tty: true
     stdin_open: true
+    stop_grace_period: 60s
     ports:
       - "25565:25565"
     environment:
       EULA: "TRUE"
       VERSION: latest
       BUILD: latest
+      PAPERMC_START_MEMORY: 1G
+      PAPERMC_MAX_MEMORY: 4G
     volumes:
       - ./minecraft:/minecraft
       - /etc/timezone:/etc/timezone

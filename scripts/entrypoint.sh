@@ -2,7 +2,8 @@
 set -e
 
 if [ ! -w /minecraft ]; then
-  echo "[ERRO] Sem permissão de escrita em /minecraft. Verifique se o dono do volume no host bate com o UID/GID do container (padrão 1000:1000)."
+  echo "[ERRO] Sem permissão de escrita em /minecraft. O processo está rodando como UID:GID $(id -u):$(id -g), mas o dono do volume no host é outro."
+  echo "[ERRO] Ajuste o dono da pasta no host (chown) OU defina HOST_UID/HOST_GID no .env pra bater com o dono atual, sem precisar rebuildar a imagem."
   exit 1
 fi
 

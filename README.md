@@ -93,7 +93,10 @@ Definidas em `docker-compose.yml`, no serviço `papermc`:
 
 - `./minecraft:/minecraft` — tudo que precisa persistir: mundo, `plugins/`, jar do servidor, `eula.txt`, `server.properties`, etc.
 
-O container roda como usuário não-root `minecraft` (uid/gid `1000` por padrão, configurável via os build args `UID`/`GID` no `docker-compose.yml`). Se a pasta `./minecraft` no host pertencer a outro usuário/uid, o servidor pode não conseguir escrever nela — ajuste o dono da pasta ou os build args pra baterem.
+O container roda como usuário não-root, uid/gid `1000` por padrão. Se a pasta `./minecraft` no host pertencer a outro usuário/uid, o servidor não consegue escrever nela — `entrypoint.sh` detecta isso no boot e aborta com uma mensagem clara em vez de falhar de um jeito confuso mais na frente. Duas formas de resolver:
+
+- **Ajustar o dono da pasta**: `sudo chown -R 1000:1000 ./minecraft` (ou o uid/gid que o container estiver usando).
+- **Ajustar o container pro dono da pasta, sem rebuild**: defina `HOST_UID`/`HOST_GID` no `.env` (veja `.env.example`) pra bater com o dono atual de `./minecraft` — `docker-compose.yml` já lê essas variáveis via `user:` em runtime, não precisa rebuildar a imagem.
 
 ## Portas
 

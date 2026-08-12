@@ -19,10 +19,12 @@ services:
   papermc:
     <<: *papermc-base
     image: ${REGISTRY_IMAGE:-gitea.oyan.dev/yan/minecloud}:latest
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     mem_limit: 5g
     ports:
       - "25565:25565"
     environment:
+      HOME: /minecraft
       EULA: "TRUE"
       VERSION: "26.2"
       BUILD: latest
@@ -35,10 +37,12 @@ services:
     <<: *papermc-base
     image: ${REGISTRY_IMAGE:-gitea.oyan.dev/yan/minecloud}:staging
     profiles: ["staging"]
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     mem_limit: 3g
     ports:
       - "25566:25565"
     environment:
+      HOME: /minecraft
       EULA: "TRUE"
       VERSION: "26.2"
       BUILD: latest

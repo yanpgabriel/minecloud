@@ -7,6 +7,8 @@ if [ ! -w /minecraft ]; then
   exit 1
 fi
 
+/scripts/aplicar-config.sh
+
 echo "Versão selecionada ${VERSION}-${BUILD}"
 
 # shellcheck disable=SC1091

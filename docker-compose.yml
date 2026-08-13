@@ -30,6 +30,7 @@ services:
       BUILD: latest
       PAPERMC_START_MEMORY: 1G
       PAPERMC_MAX_MEMORY: 4G
+      ONLINE_MODE: ${ONLINE_MODE:-}
     volumes:
       - ./minecraft:/minecraft
 
@@ -48,5 +49,6 @@ services:
       BUILD: latest
       PAPERMC_START_MEMORY: 1G
       PAPERMC_MAX_MEMORY: 2G
+      ONLINE_MODE: ${ONLINE_MODE:-}
     volumes:
       - ./minecraft-staging:/minecraft
